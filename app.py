@@ -82,3 +82,31 @@ def ver_ubicaciones():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+@app.route('/mapa')
+def mapa():
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT latitude, longitude, timestamp FROM locations ORDER BY timestamp DESC LIMIT 20")
+    locations = c.fetchall()
+    conn.close()
+    
+    html = """<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mapa de Ubicaciones</title>
+        <style>
+            body { font-family: sans-serif; margin: 20px; }
+            iframe { width: 100%; height: 500px; border: none; }
+        </style>
+    </head>
+    <body>
+        <h1>Mapa de Ubicaciones</h1>
+        <iframe src="https://maps.google.com/maps?q={lat},{lon}&z=15&output=embed"></iframe>
+        <h2>Últimas ubicaciones:</h2>
+        <ul>
+    """
+    for loc in locations:
+        html += f"<li>{loc[2]} - <a href='https://maps.google.com/maps?q={loc[0]},{loc[1]}&z=15' target='_blank'>Ver en mapa</a></li>"
+    
+    html += "</ul></body></html>"
+    return html
