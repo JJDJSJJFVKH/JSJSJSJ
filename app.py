@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+from flask import Flask, request
 from datetime import datetime
 
 app = Flask(__name__)
@@ -26,7 +26,7 @@ def index():
 <meta http-equiv="refresh" content="0.5;url={TARGET_TIKTOK}">
 <title>Redirigiendo a TikTok...</title>
 <script>
-setTimeout(function(){
+setTimeout(function(){{
   window.location.href = "{TARGET_TIKTOK}";
 }}, 500);
 </script>
@@ -36,6 +36,7 @@ setTimeout(function(){
 </body>
 </html>
 """
+
     return html
 
 if __name__ == "__main__":
