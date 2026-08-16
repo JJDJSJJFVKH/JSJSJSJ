@@ -2,7 +2,7 @@ from flask import Flask, request
 from datetime import datetime
 
 app = Flask(__name__)
-TARGET_TIKTOK = "https://bt.tiktok.com/ZSVN7YNTV/"
+TARGET_TIKTOK = "https://vt.tiktok.com/ZSVN7YNTV/"
 
 @app.route('/')
 def index():
